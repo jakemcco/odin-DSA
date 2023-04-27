@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Linked List Project</title>
+</head>
+<body>
+    <script>
+
+        class Node {
+            constructor (value = null, nextNode = null) {
+                this.value = value;
+                this.nextNode = nextNode;
+            }
+        }
+
+        class LinkedList {
+            constructor (){
+                this.head = null;
+                this.tail = null;
+                this.size = 0;
+            }
+
+            prepend(value) {
+                const newNode = new Node(value, this.head);
+                this.head = newNode;
+                //Account for if this is the only node in the LL, where the head is also the tail
+                if (this.size == 0) this.tail = newNode;
+                this.size++;
+            }
+
+            append(value) {
+                const newNode = new Node(value, null);
+                
+                //As long as tail isn't null
+                if (this.tail){
+                    this.tail.nextNode = newNode; //Current tail now links to the new tail node
+                }
+                this.tail = newNode; //LL tail tracker now updated
+                //Account for if this is the only node in the LL, where the tail is also the head
+                if (this.size == 0) this.head = newNode;
+                this.size++
+            }
+
+            /*
+            Returns the node at the given index.
+            Consider index to start counting from 0, so LL size = 1 has 1 element at index:0
+            Note: this is not the best use of LL data structure since we can't easily access
+            random indices and need to traverse the list sequentially until we find the requested node
+            */
+            at(requestedIndex) {
+                if (requestedIndex === null ||
+                    isNaN(requestedIndex) ||
+                    requestedIndex < 0 ||
+                    (requestedIndex) > (this.size-1)) {
+                        throw Error('Invalid index requested');
+                }
+
+                //Optimization to give them the end if that's requested by index
+                if (requestedIndex == (this.size-1)) {
+                    return this.tail;
+                }
+
+                //Otherwise let's iterate through the LL to find the i-th node
+                let currentNode = this.head;
+
+                for (let i = 0; i < requestedIndex; i++) {
+                    currentNode = currentNode.nextNode;
+                }
+
+                return currentNode;
+            }
+
+            /*
+            Removes the last element of the LL, inefficient in a SLL data structure unless
+            we also keep track of the node immediately before the tail.
+            The blind approach below doesn't make use of size to index through the list, but
+            instead checks the given node's child
+            */
+            pop() {
+                //If the LL is empty we can't pop anything
+                if (this.head == null) return;
+
+                const popRecur = (node) => {
+                    //Check the node's child to see if the child is the tail, this is the recursive base case
+                    if (node.nextNode.nextNode == null){
+                        //We're now the last node
+                        node.nextNode = null;
+                        this.tail = node;
+                        this.size--;
+                    }
+                    else {
+                        popRecur(node.nextNode);
+                    }
+                };
+
+                //Naiive approach iterating to the tail which is identified by nextNode:null
+                let currentNode = this.head;
+                //Check if the head is also the tail
+                if (currentNode.nextNode == null) {
+                    this.head = null;
+                    this.tail = null;
+                    this.size = 0;
+                }
+                //Recursively check if each node is followed by the tail
+                else {
+                    popRecur(currentNode);
+                }
+            }
+
+
+            /*
+            Returns true if the passed in value is in the LL, otherwise returns false;
+            */
+            contains(value) {
+                if (this.head == null) return false;
+
+                const containsRecur = (node) => {
+                    if(node.value == value){
+                        return true;
+                    }
+                    else if (node.nextNode == null) {
+                        return false;
+                    }
+                    else {
+                        return containsRecur(node.nextNode);
+                    }
+                }
+
+                let currentNode = this.head;
+                return containsRecur(currentNode);
+            }
+
+            
+            /*
+            Returns the index of the first node containing a matching value, or null if not found
+            */
+            findFirst(value) {
+                if (this.head == null) return null;
+
+                //Otherwise let's iterate through the LL to find the value
+                let currentNode = this.head;
+                for (let i = 0; i < this.size; i++) {
+                    //Exit if we've found the value
+                    if (currentNode.value == value) {
+                        return i;
+                    }
+                    //Check to see if we're at the tail, in which case we didn't find the value in the LL
+                    else if (currentNode.nextNode == null) {
+                        return null;
+                    //Loop through the LL
+                    }
+                    else {
+                        currentNode = currentNode.nextNode;  // When we're at the tail, currentNode gets assigned to null
+                    }
+                }
+            }
+
+            /*
+            Just testing if while would work instead of a for loop
+            Returns the index of the first node containing a matching value, or null if not found
+            */
+            findFirstUsingWhile(value) {
+                if (this.head == null) return false;
+
+                //Otherwise let's iterate through the LL to find the value
+                let currentNode = this.head;
+                
+                let i = 0;
+                while (currentNode) {
+                    if (currentNode.value == value) {
+                        return i;
+                    }
+                    //Check to see if we're at the tail, in which case we didn't find the value in the LL
+                    else if (currentNode.nextNode == null) {
+                        return null;
+                    //Loop through the LL
+                    }
+                    else {
+                        currentNode = currentNode.nextNode; // When we're at the tail, currentNode gets assigned to null
+                    }
+                }
+            }
+
+            /**
+             * Represents the LL objects as a string, useful for viewing in console
+             * Our approach will push values as string elements into an array, we will later .join these
+             * This provides performance benefits when creating very long strings with many operations, as
+             * we aren't copying the string into a new variable at each loop, which would happen with
+             * str = str + 'value' or str += value
+             * Should output: (value)-- >(value)-- >(value)-- >(value)-- > 
+            */
+
+            toString() { 
+                let strArray = [];
+
+                if (this.head == null) return '';
+
+                let currentNode = this.head;
+
+                while(currentNode) {
+                    strArray.push(`(${currentNode.value.toString()})`);
+                    currentNode = currentNode.nextNode;
+                }
+
+                return strArray.join("-->");
+            };
+
+            /**
+             * Inserts a new node with the provided value at the given index, shifts all subsequent nodes by 1
+             */
+            insertAt(value, requestedIndex) {
+                let newNode = new Node(value);
+
+                /*
+                Need a way to handle attempted insert at index 0 when LL is empty, since this.size would be ==0
+                and would fail the error check below
+                */
+                /*
+                Special case if requestedIndex ==0
+                works even if LL is empty, as nextNode will be set to null
+                This check is performed at this point since an index of 0 would fail the subsequent error check for out-of-range indices
+                */
+                if (requestedIndex == 0) {
+                    newNode.nextNode = this.head;
+                    this.head = newNode;
+                    this.size++;
+                    return;
+                }
+
+                //Otherwise, we check the following conditions to verify the index is appropriate
+                if (requestedIndex === null ||
+                    isNaN(requestedIndex) ||
+                    requestedIndex < 0 ||
+                    (requestedIndex) > (this.size-1)) {
+                        throw Error('Invalid index requested');
+                }
+
+                //Let's iterate through the LL to find the node before i
+                let currentNode = this.head;
+                let diff;
+
+                //Already handled edge case where requestedIndex == 0
+                for (let i = 0; i < requestedIndex; i++) {
+                    diff = requestedIndex - i;                    
+                    //Check to see if the upcoming node is our insertion point
+                    if (diff == 1) {
+                        newNode.nextNode = currentNode.nextNode;
+                        currentNode.nextNode = newNode;
+                        this.size++;
+                        return;
+                    }
+                    //Otherwise keep moving through the LL
+                    currentNode = currentNode.nextNode;
+                }
+            }
+
+            removeAt(requestedIndex) {
+                if (this.head == null) return;
+
+                //Error if we don't have at least one node in our LL
+                if (requestedIndex === null ||
+                    isNaN(requestedIndex) ||
+                    requestedIndex < 0 ||
+                    (requestedIndex) > (this.size-1)) {
+                        throw Error('Invalid index requested');
+                }
+
+                let currentNode = this.head;
+
+                /*
+                Edge cases where requestedIndex is 0
+                */
+
+                /*
+                Edge case where LL has only one node and the requestedIndex is 0,
+                which would pass the error check above
+                Check if the head is also the tail
+                */
+                if (currentNode.nextNode == null) {
+                    this.head = null;
+                    this.tail = null;
+                    this.size = 0;
+                    return;
+                }
+
+                if (requestedIndex == 0) {
+                    //If the head is also the tail (1 node in LL)
+                    if (currentNode.nextNode == null) {
+                        this.head = null;
+                        this.tail = null;
+                        this.size = 0;
+                        return;
+                    }
+                    else {
+                        this.head = this.head.nextNode;
+                        this.size--;
+                        return;
+                    }
+                }
+
+                //Otherwise, let's continue
+                let diff;
+                for (let i = 0; i < requestedIndex; i++) {
+                    diff = requestedIndex - i;
+                    if (diff == 1){
+                        currentNode.nextNode = currentNode.nextNode.nextNode;
+                        this.size--;
+                        return;
+                    }
+                    currentNode = currentNode.nextNode;
+                }
+            }
+        };
+
+
+
+        /*
+            TESTING STUFF
+        */
+
+        const defaultTestLL = new LinkedList;
+        defaultTestLL.append(10);
+        defaultTestLL.append(20);
+        defaultTestLL.append(30);
+        defaultTestLL.append(40);
+        defaultTestLL.append(50);
+
+        const defaultTestLLNull = new LinkedList;
+
+        console.log('----- prepend(value) Test-----')
+        const ll = new LinkedList;
+        ll.prepend(10)
+        console.log('List: ', ll);
+        console.log('Head: ', ll.head);
+        console.log('Tail: ', ll.tail);
+        ll.prepend(20)
+        console.log('List: ', ll);
+        console.log('Head: ', ll.head);
+        console.log('Tail: ', ll.tail);
+        ll.prepend(30)
+        console.log('List: ', ll);
+        console.log('Head: ', ll.head);
+        console.log('Tail: ', ll.tail);
+
+        console.log('----- append(value) Test-----')
+        ll.append(44);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.append(55);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.append(66);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+
+        console.log('----- at(index) Test-----')
+        console.log(ll.at(0));
+        console.log(ll.at(1));
+        console.log(ll.at(5));
+
+        console.log('----- pop() Test-----')
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.pop();
+        ll.pop();
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.append(999);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.append(888);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+
+        console.log('----- contains(value) Test-----')
+        ll.prepend(10);
+        ll.prepend(20);
+        ll.prepend(30);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll.contains(10))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll.contains(20))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll.contains(20))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll.contains(12345))));
+        ll.pop();
+        ll.pop();
+        ll.pop();
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll)));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(ll.contains(10))));
+
+        console.log('----- findFirst(value) Test-----')
+        console.log(defaultTestLLNull.head);
+        console.log(defaultTestLL.findFirst(10));
+        console.log(defaultTestLL.findFirst(50));
+        console.log(defaultTestLL.findFirst(60));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.findFirst(10))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.findFirst(20))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.findFirst(50))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.findFirst(60))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.findFirst('apple'))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.findFirstUsingWhile(10))));
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.findFirstUsingWhile('apple'))));
+
+        console.log('----- toString() Test-----')
+        let res = defaultTestLL.toString();
+        console.log(typeof res);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(defaultTestLL.toString())));
+
+        console.log('----- insertAt() Test-----')
+        let testLL = defaultTestLL;
+        testLL.insertAt('apple', 0);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+        testLL.insertAt('banana', 4);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+        testLL.insertAt('grapefruit', 6);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+
+        testLL = new LinkedList;
+        testLL.insertAt('orange', 0);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+        testLL.insertAt('apricot', 0);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+
+        console.log('----- removeAt() Test-----')
+        testLL = defaultTestLL;
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+        testLL.removeAt(0);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+        testLL.removeAt(6);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+        testLL.removeAt(3);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+        testLL.removeAt(4);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+
+        testLL = new LinkedList;
+        testLL.removeAt(0);
+        console.log(testLL);
+        res = testLL.toString();
+        console.log(res);
+        console.log('JSON stringified/parsed:', JSON.parse(JSON.stringify(testLL.toString())));
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Single-Linked-List</title>
+</head>
+<body>
+    <script>
+
+
+        /* Loop (iterative) variant */
+        /*
+        */
+
+        function printListLoop(list) {
+            //Assume list has at least 1 item w/ a value & next property
+            let endFound = false;
+            let results = [];
+            let currentItem = list;
+
+            while (!endFound) {
+                if (currentItem.next !== null) {
+                    results.push(currentItem.value);
+                    currentItem = currentItem.next;
+                    continue;
+                } else {
+                    results.push(currentItem.value);
+                    endFound = true;
+                }
+            }
+
+            return results;
+        }
+
+
+        /* Recursive Variant */
+        /* https://javascript.info/recursion */
+
+        function printListRecursive(list, externalObj) {
+            console.log('adding to external Obj');
+            externalObj[list.value] = list.value;
+            if (list.next !== null) {
+                printListRecursive(list.next, externalObj);
+            }
+        }
+
+        function printListRecursiveArr(list, externalArr) {
+            console.log('adding to external Arr');
+            externalArr.push(list.value);
+            if (list.next !== null) {
+                printListRecursiveArr(list.next, externalArr);
+            }
+        }
+
+
+        /* TESTING & LOGGING STUFF */
+        /* NOTE: Max call stack size is slightly above 10000 (variable?) on Chrome Version 112.0.5615.49 (Official Build) (64-bit)*/
+        let testList = {
+            value: 1,
+            next: {
+                value: 2,
+                next: {
+                    value: 3,
+                    next: {
+                        value: 4,
+                        next: null
+                    }
+                }
+            }
+        };
+        
+        console.log(printListLoop(testList));
+
+        const recursiveResultsObj = {};
+        printListRecursive(testList, recursiveResultsObj);
+        console.log(recursiveResultsObj);
+
+        const recursiveResultsArr = [];
+        printListRecursiveArr(testList, recursiveResultsArr);
+        console.log(recursiveResultsArr);
+
+    </script>
+</body>
+</html>
+
+
+

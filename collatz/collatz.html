@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Collatz</title>
+</head>
+<body>
+    <script>
+
+        /* Recursive Variant */
+        /* https://www.youtube.com/watch?v=mz6tAJMVmfM*/
+
+        /* Applies to all positive integers:
+            You can always get back to 1 if you follow these steps:
+            if n = 1, stop
+            otherwise, if n is even, repeat this process on n/2
+            otherwise, if n is odd, repeat this process on 3n + 1.
+
+            collatz(n) should return the number of steps required to return to 1
+        */
+
+        function collatz(n) {
+            //requires int n>=1
+            if (n == 1) {
+                return 0;
+            } else if (!(n % 2)) {
+                return 1 + collatz(n/2);
+            } else {
+                return 1 + collatz(3*n+1);
+            }
+        }
+
+        /* TESTING & LOGGING STUFF */
+        /* NOTE: Max call stack size is slightly above 10000 (variable?) on Chrome Version 112.0.5615.49 (Official Build) (64-bit)*/
+
+        const testValArr = [1, 2, 3, 4, 5, 6, 7, 8, 15, 27, 50];
+        const testValObj = {};
+        let result;
+
+        /* Obj mimicing test value array for console logging purposes */
+        for (let testVal of testValArr){
+            testValObj[testVal] = testVal;
+        }
+    
+        /* Recursive algorithm */
+        let results1 = [];
+        let results1Obj = {};
+
+        for (let val of testValArr) {
+            result = collatz(val);
+            results1.push(result);
+            results1Obj[val] = result;
+        }
+
+        /*
+        Combined results for console logging w/ table
+        index is value the function was called with
+        */
+        const combinedResultsObj = {};
+        combinedResultsObj.recursive = results1Obj;
+
+        console.table(combinedResultsObj);
+
+
+
+    </script>
+</body>
+</html>
+
+
+

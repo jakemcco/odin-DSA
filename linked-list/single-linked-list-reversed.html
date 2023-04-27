@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Single-Linked-List Reversed</title>
+</head>
+<body>
+    <script>
+
+
+        /* Loop (iterative) variant */
+        /*
+        */
+
+        function printListLoop(list) {
+            //Assume list has at least 1 item w/ a value & next property
+            let endFound = false;
+            let results = [];
+            let currentItem = list;
+
+            while (!endFound) {
+                if (currentItem.next !== null) {
+                    results.push(currentItem.value);
+                    currentItem = currentItem.next;
+                    continue;
+                } else {
+                    results.push(currentItem.value);
+                    endFound = true;
+                }
+            }
+
+            return results;
+        }
+
+
+        /* Recursive Variant */
+        /* https://javascript.info/recursion */
+
+        function printListReverseRecursive(list, externalArr) {
+            if (list.next !== null) {
+                printListReverseRecursive(list.next, externalArr);
+            }
+            console.log('adding to external Arr');
+            externalArr.push(list.value);
+        }
+
+
+        /* TESTING & LOGGING STUFF */
+        /* NOTE: Max call stack size is slightly above 10000 (variable?) on Chrome Version 112.0.5615.49 (Official Build) (64-bit)*/
+        let testList = {
+            value: 1,
+            next: {
+                value: 2,
+                next: {
+                    value: 3,
+                    next: {
+                        value: 4,
+                        next: null
+                    }
+                }
+            }
+        };
+        
+        const recursiveResultsArr = [];
+        printListReverseRecursive(testList, recursiveResultsArr);
+        console.log(recursiveResultsArr);
+
+    </script>
+</body>
+</html>
+
+
+
